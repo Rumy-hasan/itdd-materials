@@ -28,3 +28,82 @@
 
 import Foundation
 import XCTest
+
+class CashRegister {
+    var availableFunds: Decimal
+    var transactionTotal: Decimal = 0
+    
+    init(availableFunds: Decimal ) {
+        self.availableFunds = availableFunds
+    }
+    
+    func addItem(itemCost: Decimal) {
+        self.transactionTotal += itemCost
+    }
+    
+    func acceptCashPayment(_ cash: Decimal) {
+        self.transactionTotal -= cash
+        self.availableFunds += cash
+    }
+    
+}
+
+class CashRegisterTests:XCTestCase{
+    var availableFunds: Decimal!
+    var itemCost: Decimal!
+    var payment: Decimal!
+    var sut: CashRegister!
+    
+    
+    override func setUp() {
+        super.setUp()
+        availableFunds = 100
+        itemCost = 45
+        payment = 40
+        sut = CashRegister(availableFunds: availableFunds)
+    }
+    
+    override func tearDown() {
+        availableFunds = nil
+        itemCost = nil
+        payment = nil
+        sut = nil
+        super.tearDown()
+    }
+    
+    func testInitAvailableFunds_setsAvailableFunds() {
+        XCTAssertEqual(sut.availableFunds, availableFunds)
+    }
+    
+    func testAddItem_oneItem_addsCostToTransactionTotal() {
+        sut.addItem(itemCost: itemCost)
+        XCTAssertEqual(sut.transactionTotal, itemCost)
+    }
+    
+    func testAddItem_twoItems_addsCostsToTransactionTotal() {
+        let expectedTotalCost = itemCost+itemCost
+        sut.addItem(itemCost: itemCost)
+        sut.addItem(itemCost: itemCost)
+        XCTAssertEqual(sut.transactionTotal, expectedTotalCost)
+    }
+    
+    func testAcceptCashPayment_subtractsPaymentFromTransactionTotal() {
+        transactionInProgress()
+        let expected = sut.transactionTotal-payment
+        sut.acceptCashPayment(payment)
+        XCTAssertEqual(sut.transactionTotal, expected)
+    }
+    
+    func testAcceptCashPayment_addsPaymentToAvailableFunds(){
+        transactionInProgress()
+        let expected = sut.availableFunds + payment
+        sut.acceptCashPayment(payment)
+        XCTAssertEqual(sut.availableFunds, expected)
+    }
+    
+    func transactionInProgress() {
+        sut.addItem(itemCost: itemCost)
+        sut.addItem(itemCost: itemCost)
+    }
+}
+CashRegisterTests.defaultTestSuite.run()
